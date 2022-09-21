@@ -237,7 +237,6 @@ export const m = {
   // SubmissionList.vue
   When: '時間',
   ID: 'ID',
-  SubtaskNumber: 'Subtask',
   Time: '時間',
   Memory: '記憶體空間',
   Author: '作者',

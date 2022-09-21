@@ -97,7 +97,6 @@ export const m = {
   Contest_Password: '密碼',
   Contest_Rule_Type: '規則',
   Real_Time_Rank: '即時排名',
-  Real_Time_Submission: 'Real Time Submission',
   Contest_Status: '狀態',
   Allowed_IP_Ranges: '允許的 IP 範圍',
   CIDR_Network: 'CIDR Network',

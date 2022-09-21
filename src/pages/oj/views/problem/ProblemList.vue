@@ -112,7 +112,7 @@
           },
           {
             title: this.$i18n.t('m.Title'),
-            width: 300,
+            width: 400,
             render: (h, params) => {
               return h('Button', {
                 props: {
@@ -210,7 +210,6 @@
           this.problemList = res.data.data.results
           if (this.isAuthenticated) {
             this.addStatusColumn(this.problemTableColumns, res.data.data.results)
-            this.addScoreColumn(this.problemTableColumns, res.data.data.results)
           }
         }, res => {
           this.loadings.table = false

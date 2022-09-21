@@ -59,12 +59,6 @@ const getters = {
     }
     return state.contest.real_time_rank === true || getters.isContestAdmin
   },
-  OIContestRealTimeSubmissionPermission: (state, getters, _, rootGetters) => {
-    if (getters.contestRuleType === 'ACM' || getters.contestStatus === CONTEST_STATUS.ENDED) {
-      return true
-    }
-    return state.contest.real_time_submission === true || getters.isContestAdmin
-  },
   problemSubmitDisabled: (state, getters, _, rootGetters) => {
     if (getters.contestStatus === CONTEST_STATUS.ENDED) {
       return true

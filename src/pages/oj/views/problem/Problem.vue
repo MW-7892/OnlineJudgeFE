@@ -64,7 +64,7 @@
         <Row type="flex" justify="space-between">
           <Col :span="10">
             <div class="status" v-if="statusVisible">
-              <template v-if="!this.contestID || (this.contestID && (OIContestRealTimePermission || OIContestRealTimeSubmissionPermission))">
+              <template v-if="!this.contestID || (this.contestID && OIContestRealTimePermission)">
                 <span>{{$t('m.Status')}}</span>
                 <Tag type="dot" :color="submissionStatus.color" @click.native="handleRoute('/status/'+submissionId)">
                   {{$t('m.' + submissionStatus.text.replace(/ /g, "_"))}}
@@ -78,7 +78,7 @@
               <Alert type="success" show-icon>{{$t('m.You_have_solved_the_problem')}}</Alert>
             </div>
             <div v-else-if="this.contestID && !OIContestRealTimePermission && submissionExists">
-              <Alert type="info" show-icon>{{$t('m.You_have_submitted_a_solution')}}</Alert>
+              <Alert type="success" show-icon>{{$t('m.You_have_submitted_a_solution')}}</Alert>
             </div>
             <div v-if="contestEnded">
               <Alert type="warning" show-icon>{{$t('m.Contest_has_ended')}}</Alert>
@@ -108,11 +108,6 @@
     <div id="right-column">
       <VerticalMenu @on-click="handleRoute">
         <template v-if="this.contestID">
-          <VerticalMenu-item disabled>
-            <Tag type="dot" :color="countdownColor">
-              <span id="countdown">{{countdown}}</span>
-            </Tag>
-          </VerticalMenu-item>
           <VerticalMenu-item :route="{name: 'contest-problem-list', params: {contestID: contestID}}">
             <Icon type="ios-photos"></Icon>
             {{$t('m.Problems')}}
@@ -124,13 +119,13 @@
           </VerticalMenu-item>
         </template>
 
-        <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission || OIContestRealTimeSubmissionPermission" :route="submissionRoute">
+        <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission" :route="submissionRoute">
           <Icon type="navicon-round"></Icon>
            {{$t('m.Submissions')}}
         </VerticalMenu-item>
 
         <template v-if="this.contestID">
-          <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission || OIContestRealTimeSubmissionPermission"
+          <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission"
                              :route="{name: 'contest-rank', params: {contestID: contestID}}">
             <Icon type="stats-bars"></Icon>
             {{$t('m.Rankings')}}
@@ -215,7 +210,7 @@
   import ProblemPdf from '@oj/components/ProblemPdf.vue'
   import storage from '@/utils/storage'
   import {FormMixin} from '@oj/components/mixins'
-  import {JUDGE_STATUS, CONTEST_STATUS_REVERSE, CONTEST_STATUS, buildProblemCodeKey} from '@/utils/constants'
+  import {JUDGE_STATUS, CONTEST_STATUS, buildProblemCodeKey} from '@/utils/constants'
   import api from '@oj/api'
   import {pie, largePie} from './chartData'
 
@@ -316,7 +311,11 @@
             return
           }
           // try to load problem template
-          this.language = this.getDefaultLanguage(this.problem.languages)
+          if (this.problem.language.size() === 1) {
+            this.language = this.problem.languages[0]
+          } else {
+            this.language = this.problem.languages[1]
+          }
           let template = this.problem.template
           if (template && template[this.language]) {
             this.code = template[this.language]
@@ -324,14 +323,6 @@
         }, () => {
           this.$Loading.error()
         })
-      },
-      getDefaultLanguage (languages) {
-        for (let preferedLanguage of ['C++', 'Python3']) {
-          if (languages.includes(preferedLanguage)) {
-            return preferedLanguage
-          }
-        }
-        return languages[0]
       },
       extractLink (desc) {
         var rx = /\/public\/upload\/(..........\.pdf)/g
@@ -469,7 +460,7 @@
           })
         }
 
-        if (this.contestRuleType === 'OI' && !(this.OIContestRealTimePermission || this.OIContestRealTimeSubmissionPermission)) {
+        if (this.contestRuleType === 'OI' && !this.OIContestRealTimePermission) {
           if (this.submissionExists) {
             this.$Modal.confirm({
               title: '',
@@ -499,12 +490,7 @@
       }
     },
     computed: {
-      ...mapGetters(['contestStatus', 'countdown', 'problemSubmitDisabled', 'contestRuleType', 'OIContestRealTimePermission', 'OIContestRealTimeSubmissionPermission', 'contestStatus']),
-      countdownColor () {
-        if (this.contestStatus) {
-          return CONTEST_STATUS_REVERSE[this.contestStatus].color
-        }
-      },
+      ...mapGetters(['problemSubmitDisabled', 'contestRuleType', 'OIContestRealTimePermission', 'contestStatus']),
       contest () {
         return this.$store.state.contest.contest
       },
@@ -559,10 +545,6 @@
       flex: none;
       width: 220px;
     }
-  }
-
-  #countdown {
-    font-size: 16px;
   }
 
   #problem-content {
